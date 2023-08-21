@@ -20,9 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-mongoose.connect(
-  "mongodb+srv://huyn07965:D7qfuWOEN5FBpRW1@cluster0.hzf4xvw.mongodb.net/management"
-);
+mongoose.connect(process.env.MONGODB_CONNECT_URI);
 
 // mongoose.connect("mongodb://127.0.0.1:27017/node_crud");
 

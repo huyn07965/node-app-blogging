@@ -80,40 +80,92 @@ app.get("/send-otp/:email", (req, res) => {
   });
 });
 
-app.get("/verify-otp", async (req, res) => {
-  const { email, otp } = req.query;
+// Thay doi
 
-  if (tempStorage[email] && tempStorage[email] == otp) {
-    delete tempStorage[email];
-    const user = await UserModel.findOneAndUpdate(
-      { email: email },
-      {
-        password: "",
+// app.get("/verify-otp", async (req, res) => {
+//   const { email, otp } = req.query;
+
+//   if (tempStorage[email] && tempStorage[email] == otp) {
+//     delete tempStorage[email];
+//     const user = await UserModel.findOneAndUpdate(
+//       { email: email },
+//       {
+//         password: "",
+//       }
+//     );
+//     if (user) {
+//       res.status(200).send("Thông tin người dùng đã được cập nhật");
+//     } else {
+//       res.status(404).send("Không tìm thấy người dùng");
+//     }
+//     console.log("Mã OTP hợp lệ");
+//   } else {
+//     console.log("Mã OTP không hợp lệ");
+//   }
+// });
+
+app.get("/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.query;
+
+    if (tempStorage[email] && tempStorage[email] == otp) {
+      delete tempStorage[email];
+      const user = await UserModel.findOneAndUpdate(
+        { email: email },
+        {
+          password: "",
+        }
+      );
+      if (user) {
+        res.status(200).send("Thông tin người dùng đã được cập nhật");
+      } else {
+        res.status(404).send("Không tìm thấy người dùng");
       }
-    );
-    if (user) {
-      res.status(200).send("Thông tin người dùng đã được cập nhật");
+      console.log("Mã OTP hợp lệ");
     } else {
-      res.status(404).send("Không tìm thấy người dùng");
+      console.log("Mã OTP không hợp lệ");
+      res.status(400).send("Mã OTP không hợp lệ");
     }
-    console.log("Mã OTP hợp lệ");
-  } else {
-    console.log("Mã OTP không hợp lệ");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Lỗi server");
   }
 });
 
+// thay doi
+
+// app.put("/changePass", async (req, res) => {
+//   const email = req.query.email;
+//   const salt = await bcrypt.genSalt(Number(process.env.SALT));
+//   const hashPassword = await bcrypt.hash(req.body.password, salt);
+//   UserModel.findOneAndUpdate(
+//     { email: email },
+//     {
+//       password: hashPassword,
+//     }
+//   )
+//     .then((users) => res.json(users))
+//     .catch((err) => res.json(err));
+// });
+
 app.put("/changePass", async (req, res) => {
-  const email = req.query.email;
-  const salt = await bcrypt.genSalt(Number(process.env.SALT));
-  const hashPassword = await bcrypt.hash(req.body.password, salt);
-  UserModel.findOneAndUpdate(
-    { email: email },
-    {
-      password: hashPassword,
-    }
-  )
-    .then((users) => res.json(users))
-    .catch((err) => res.json(err));
+  try {
+    const email = req.query.email;
+    const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email: email },
+      {
+        password: hashPassword,
+      },
+      { new: true }
+    );
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.json(err);
+  }
 });
 
 app.get("/auth", (req, res) => {
@@ -164,15 +216,48 @@ app.get("/user", (req, res) => {
     .catch((err) => res.json(err));
 });
 
-app.post("/createUser", upload.single("file"), async (req, res) => {
-  const salt = await bcrypt.genSalt(Number(process.env.SALT));
-  const hashPassword = await bcrypt.hash(req.body.password, salt);
+// Thay doi
 
-  const userIsValid = await UserModel.findOne({ email: req.body.email });
-  if (userIsValid) {
-    res.status(409).send("User with given email already exist");
-  } else {
-    UserModel.create({
+// app.post("/createUser", upload.single("file"), async (req, res) => {
+//   const salt = await bcrypt.genSalt(Number(process.env.SALT));
+//   const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+//   const userIsValid = await UserModel.findOne({ email: req.body.email });
+//   if (userIsValid) {
+//     res.status(409).send("User with given email already exist");
+//   } else {
+//     UserModel.create({
+//       avatar: req.body.avatar,
+//       email: req.body.email,
+//       fullName: req.body.fullName,
+//       userName: req.body.userName,
+//       password: hashPassword,
+//       status: req.body.status,
+//       hot: req.body.hot,
+//       role: req.body.role,
+//       slug: req.body.slug,
+//       description: req.body.description,
+//       watchLater: req.body.watchLater,
+//       likePost: req.body.likePost,
+//       follow: req.body.follow,
+//       follower: req.body.follower,
+//     })
+//       .then((users) => res.json(users))
+//       .catch((err) => res.json(err));
+//   }
+// });
+
+app.post("/createUser", upload.single("file"), async (req, res) => {
+  try {
+    const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    const userIsValid = await UserModel.findOne({ email: req.body.email });
+    if (userIsValid) {
+      return res.status(409).send("User with given email already exists");
+    }
+
+    const newUser = await UserModel.create({
       avatar: req.body.avatar,
       email: req.body.email,
       fullName: req.body.fullName,
@@ -187,9 +272,12 @@ app.post("/createUser", upload.single("file"), async (req, res) => {
       likePost: req.body.likePost,
       follow: req.body.follow,
       follower: req.body.follower,
-    })
-      .then((users) => res.json(users))
-      .catch((err) => res.json(err));
+    });
+
+    res.json(newUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 

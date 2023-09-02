@@ -4,43 +4,43 @@ const jwt = require("jsonwebtoken");
 const UserSchema = new mongoose.Schema({
   avatar: {
     type: String,
-    default: "null",
+    default: "",
   },
   email: {
     type: String,
-    default: "null",
+    default: "",
   },
   fullName: {
     type: String,
-    default: "null",
+    default: "",
   },
   userName: {
     type: String,
-    default: "null",
+    default: "",
   },
   password: {
     type: String,
-    default: "null",
+    default: "",
   },
   status: {
     type: Number,
-    default: "null",
+    default: "",
   },
   hot: {
     type: Number,
-    default: "null",
+    default: "",
   },
   role: {
     type: Number,
-    default: "null",
+    default: "",
   },
   slug: {
     type: String,
-    default: "null",
+    default: "",
   },
   description: {
     type: String,
-    default: "null",
+    default: "",
   },
   watchLater: {
     type: Array,

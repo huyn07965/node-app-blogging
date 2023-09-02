@@ -9,6 +9,8 @@ const CommentModel = require("./model/Comment");
 const CategoryModel = require("./model/Category");
 const PostModel = require("./model/Post");
 const ContactModel = require("./model/Contact");
+const ReportModel = require("./model/Report");
+const NotificationModel = require("./model/Notification");
 const userRoutes = require("./routes/users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -317,22 +319,22 @@ app.get("/postFilter", (req, res) => {
   let sortOption = { createdAt: -1 };
   if (sortByLike === "likeIncrease") {
     sortOption.like = 1;
-    // sortOption.view = 0;
+    sortOption.view = 0;
     sortOption.createdAt = 0;
   }
   if (sortByLike === "likeDecrease") {
     sortOption.like = -1;
-    // sortOption.view = 0;
+    sortOption.view = 0;
     sortOption.createdAt = 0;
   }
 
   if (sortByView === "viewIncrease") {
-    // sortOption.like = 0;
-    sortOption.view = -1;
+    sortOption.like = 0;
+    sortOption.view = 1;
     sortOption.createdAt = 0;
   }
   if (sortByView === "viewDecrease") {
-    // sortOption.like = 0;
+    sortOption.like = 0;
     sortOption.view = -1;
     sortOption.createdAt = 0;
   }
@@ -342,7 +344,7 @@ app.get("/postFilter", (req, res) => {
     query = { "category.slug": category };
   }
 
-  PostModel.find()
+  PostModel.find(query)
     .sort(sortOption)
     .then((posts) => res.json(posts))
     .catch((error) => res.status(500).json({ message: error.message }));
@@ -357,7 +359,7 @@ app.get("/postHot", (req, res) => {
 });
 
 app.get("/allPost", (req, res) => {
-  PostModel.find({ s1tatus: 1 })
+  PostModel.find({ status: 1 })
     .sort({ createdAt: -1 })
     .then((post) => res.json(post))
     .catch((err) => res.json(err));
@@ -396,7 +398,7 @@ app.get("/postAuthorId/:id", (req, res) => {
 
 app.get("/postDetail/:slug", (req, res) => {
   const slug = req.params.slug;
-  PostModel.find({ slug: slug })
+  PostModel.findOne({ slug: slug })
     .then((post) => res.json(post))
     .catch((err) => res.json(err));
 });
@@ -446,6 +448,46 @@ app.put("/updatePost/:id", (req, res) => {
     .catch((err) => res.json(err));
 });
 
+app.put("/updatePostLike", async (req, res) => {
+  const postId = req.query.id;
+  const userId = req.query.userId;
+  const action = req.query.action;
+
+  try {
+    const post = await PostModel.findById({ _id: postId });
+    const user = await UserModel.findById({ _id: userId });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    if (!user) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    if (user.likePost === undefined) {
+      user.likePost = [];
+    }
+
+    if (action === "increment") {
+      post.like += 1;
+      user.likePost.push(postId);
+    } else if (action === "decrement") {
+      post.like -= 1;
+      const index = user.likePost.indexOf(postId);
+      if (index !== -1) {
+        user.likePost.splice(index, 1);
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+    const updatedPost = await post.save();
+    const updatedUser = await user.save();
+    res.json({ like: updatedPost.like, likePost: updatedUser.likePost });
+  } catch (error) {
+    console.error("Error updating like:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.delete("/deletePost/:id", (req, res) => {
   const id = req.params.id;
   PostModel.findByIdAndDelete({ _id: id })
@@ -457,7 +499,7 @@ app.delete("/deletePost/:id", (req, res) => {
 
 app.get("/comment/:id", (req, res) => {
   const idPost = req.params.id;
-  CommentModel.find({ idPost: idPost })
+  CommentModel.find({ idPost: idPost, idReply: "" })
     .sort({ createdAt: -1 })
     .then((comment) => res.json(comment))
     .catch((err) => res.json(err));
@@ -534,6 +576,76 @@ app.put("/updateContact/:id", (req, res) => {
     }
   )
     .then((contact) => res.json(contact))
+    .catch((err) => res.json(err));
+});
+
+//Api report
+app.post("/createReport", (req, res) => {
+  ReportModel.create({
+    idUser: req.body.idUser,
+    idPost: req.body.idPost,
+    idComment: req.body.idComment,
+    reason: req.body.reason,
+    content: req.body.content,
+    active: req.body.active,
+  })
+    .then((report) => res.json(report))
+    .catch((err) => res.json(err));
+});
+
+app.put("/updateReport/:id", (req, res) => {
+  const id = req.params.id;
+  ReportModel.findByIdAndUpdate(
+    { _id: id },
+    {
+      active: true,
+    }
+  )
+    .then((report) => res.json(report))
+    .catch((err) => res.json(err));
+});
+
+app.get("/getReport/:id", (req, res) => {
+  const id = req.params.id;
+  ReportModel.findById({ _id: id })
+    .then((report) => res.json(report))
+    .catch((err) => res.json(err));
+});
+app.get("/getAllReport", (req, res) => {
+  ReportModel.find({ active: false })
+    .sort({ createdAt: -1 })
+    .then((report) => res.json(report))
+    .catch((err) => res.json(err));
+});
+//Api Notification
+
+app.get("/notification", (req, res) => {
+  NotificationModel.find({})
+    .limit(10)
+    .then((notification) => res.json(notification))
+    .catch((err) => res.json(err));
+});
+
+app.post("/createNotification", (req, res) => {
+  NotificationModel.create({
+    userId: req.body.userId,
+    postId: req.body.postId,
+    content: req.body.content,
+    // watch: false,
+  })
+    .then((notification) => res.json(notification))
+    .catch((err) => res.json(err));
+});
+
+app.put("/updateNotification/:id", (req, res) => {
+  const id = req.params.id;
+  NotificationModel.findByIdAndUpdate(
+    { _id: id },
+    {
+      watch: true,
+    }
+  )
+    .then((notification) => res.json(notification))
     .catch((err) => res.json(err));
 });
 

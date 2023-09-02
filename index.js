@@ -23,6 +23,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 mongoose.connect(process.env.MONGODB_CONNECT_URI);
+mongoose.set("strictQuery", false);
 
 // mongoose.connect("mongodb://127.0.0.1:27017/node_crud");
 

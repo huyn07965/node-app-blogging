@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  descriptionEN: {
+    type: String,
+    default: "",
+  },
   watchLater: {
     type: Array,
     default: [],
@@ -50,13 +54,25 @@ const UserSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  likeComment: {
+    type: Array,
+    default: [],
+  },
   follow: {
     type: Array,
     default: [],
   },
+  totalFollow: {
+    type: Number,
+    default: 0,
+  },
   follower: {
     type: Array,
     default: [],
+  },
+  totalFollower: {
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,
@@ -70,7 +86,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.generateAuthToken = function () {
   const token = jwt.sign({ _id: this._id }, process.env.JWTPRIVATEKEY, {
-    expiresIn: "1d",
+    expiresIn: "7d",
   });
   return token;
 };

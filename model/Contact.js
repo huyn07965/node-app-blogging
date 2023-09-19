@@ -5,6 +5,10 @@ const ContactSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  contentEN: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

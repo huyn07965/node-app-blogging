@@ -5,6 +5,10 @@ const CategorySchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  nameEN: {
+    type: String,
+    default: null,
+  },
   slug: {
     type: String,
     default: null,

@@ -2,7 +2,11 @@ const { boolean } = require("joi");
 const mongoose = require("mongoose");
 
 const NotificationSchema = new mongoose.Schema({
-  userID: {
+  UserReceive: {
+    type: String,
+    default: null,
+  },
+  userId: {
     type: String,
     default: null,
   },
@@ -14,7 +18,15 @@ const NotificationSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  watch: {
+  contentEN: {
+    type: String,
+    default: null,
+  },
+  class: {
+    type: String,
+    default: null,
+  },
+  seen: {
     type: Boolean,
     default: false,
   },

@@ -17,13 +17,21 @@ const ReportSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-  content: {
+  reasonEN: {
+    type: Array,
+    default: [],
+  },
+  description: {
     type: String,
     default: "",
   },
-  active: {
-    type: Boolean,
-    default: false,
+  descriptionEN: {
+    type: String,
+    default: "",
+  },
+  status: {
+    type: Number,
+    default: 2,
   },
   createdAt: {
     type: Date,

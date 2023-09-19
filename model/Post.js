@@ -5,6 +5,10 @@ const PostSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  titleEN: {
+    type: String,
+    default: null,
+  },
   slug: {
     type: String,
     default: null,
@@ -16,6 +20,10 @@ const PostSchema = new mongoose.Schema({
     default: null,
   },
   content: {
+    type: String,
+    default: null,
+  },
+  contentEN: {
     type: String,
     default: null,
   },
@@ -33,7 +41,11 @@ const PostSchema = new mongoose.Schema({
   },
   like: {
     type: Number,
-    default: null,
+    default: 0,
+  },
+  save: {
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,

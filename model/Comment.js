@@ -25,8 +25,8 @@ const CommentSchema = new mongoose.Schema({
   },
 
   like: {
-    type: Array,
-    default: [],
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,

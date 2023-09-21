@@ -33,7 +33,8 @@ const socketIo = require("socket.io")(http, {
 });
 app.use(express.json());
 // app.use(cors());
-app.use(cors({ origin: "https://react-app-blogging.onrender.com" }));
+// app.use(cors({ origin: "https://react-app-blogging.onrender.com" }));
+app.use(cors({ origin: "https://react-app-blog.onrender.com" }));
 app.use(express.static("public"));
 // const server = http.createServer(app);
 // const io = socketIo(server);
